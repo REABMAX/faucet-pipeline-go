@@ -1,6 +1,6 @@
 https://goreportcard.com/report/github.com/REABMAX/faucet-pipeline-go[image:https://goreportcard.com/badge/github.com/REABMAX/faucet-pipeline-go[GoReport Card]]
-|
-https://github.com/REABMAX/faucet-pipeline-go/workflows/test/badge.svg[image:https://github.com/REABMAX/faucet-pipeline-go/workflows/Test/badge.svg[Test Workflow]]
+-
+https://github.com/REABMAX/faucet-pipeline-go/workflows/Test/badge.svg[image:https://github.com/REABMAX/faucet-pipeline-go/workflows/Test/badge.svg[Test Workflow]]
 
 = Go with faucet-pipeline
 
