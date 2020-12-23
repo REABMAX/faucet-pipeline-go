@@ -1,0 +1,99 @@
+= Go with faucet-pipeline
+
+This go module provides a simple integration for
+https://www.faucet-pipeline.org/[faucet-pipeline] in go. Faucet is able to generate a
+`manifest.json` file with fingerprinted names of the generated assets. Using the
+fingerprint mechanism it's not possible anymore to hardcode URIs in your go templates,
+therefore a bit of integration code is needed to dynamically read the correct paths from
+the manifest.
+
+== Installation
+
+To install `faucet-pipeline-go` run
+
+    go get github.com/REABMAX/faucet-pipeline-go
+
+== Usage
+
+Import faucet-pipeline-go:
+
+[source,go]
+----
+import "github.com/REABMAX/faucet-pipeline-go"
+----
+
+then, in your main func create a FaucetPipeline structure with the ManifestPath as
+configuration parameter:
+
+[source,go]
+----
+func main() {
+	faucetPipeline := faucet.Pipeline{
+		ManifestPath: "path/to/manifest.json",
+		HotReload: true,
+	}
+}
+----
+
+Now we can add our template func for go's template engine. This example uses
+https://github.com/gin-gonic/gin[gin] but you can use it with plain go template or any
+other framework as well.
+
+[source,go]
+----
+router := gin.Default()
+router.Static("/dist/", "./assets/dist")
+router.FuncMap = template.FuncMap{
+    "assets": faucetPipeline.TemplateFunc,
+}
+router.LoadHTMLGlob("templates/*")
+router.GET("/", func(context *gin.Context) {
+    context.HTML(http.StatusOK, "index.html", nil)
+})
+
+err = router.Run(":3000")
+----
+
+We can use our template func with the `assets` shortcut in our template:
+
+[source,html]
+----
+<html>
+    <head>
+        <script type="text/javascript" src="{{ "dist/bundle.js" | assets }}"></script>
+        <link rel="stylesheet" type="text/css" href="{{ "dist/bundle.css" | assets }}">
+    </head>
+    <body>
+        <h1>faucet-pipeline rules!</h1>
+    </body>
+</body>
+</html>
+----
+
+`faucet-pipeline-go` will look for the keys `dist/bundle.js` and `dist/bundle.css` in faucets
+manifest.json and add the fingerprinted file path to the template.
+
+== Configuration
+
+`faucet-pipeline-go` is configurable via exported FaucetPipeline struct properties:
+
+[source,go]
+----
+// Pipeline defines a configuration for faucet-pipeline-go.
+type Pipeline struct {
+	ManifestPath string // ManifestPath: Path to your manifest.json file
+	HotReload bool // HotReload: if true, manifest will be parsed on every call. Good for development purposes
+}
+----
+
+== Tests
+
+For testing https://github.com/onsi/ginkgo[ginkgo] is used. To run the tests:
+
+    ginkgo -r
+
+== ToDo / planned
+
+- Optimize HotReload functionality
+    * Reload based on request not on each call
+    * Check for file change date before reload

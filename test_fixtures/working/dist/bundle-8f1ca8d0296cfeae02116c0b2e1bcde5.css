@@ -1,0 +1,7 @@
+body:before {
+	content: "\26a0  CSS Error: src/index.scss: no such file or directory";
+	font-weight: bold;
+	display: block;
+	border: 5px solid red;
+	padding: 5px;
+}
