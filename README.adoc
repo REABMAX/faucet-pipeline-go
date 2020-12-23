@@ -1,6 +1,6 @@
 https://goreportcard.com/report/github.com/REABMAX/faucet-pipeline-go[image:https://goreportcard.com/badge/github.com/REABMAX/faucet-pipeline-go[GoReport Card]]
--
 https://github.com/REABMAX/faucet-pipeline-go/workflows/Test/badge.svg[image:https://github.com/REABMAX/faucet-pipeline-go/workflows/Test/badge.svg[Test Workflow]]
+https://codecov.io/gh/REABMAX/faucet-pipeline-go/branch/main/graph/badge.svg?token=JRS3J7L6HT[image:https://codecov.io/gh/REABMAX/faucet-pipeline-go/branch/main/graph/badge.svg?token=JRS3J7L6HT[Code Coverage]]
 
 = Go with faucet-pipeline
 
