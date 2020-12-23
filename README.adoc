@@ -101,3 +101,7 @@ For testing https://github.com/onsi/ginkgo[ginkgo] is used. To run the tests:
 - Optimize HotReload functionality
     * Reload based on request not on each call
     * Check for file change date before reload
+- For better error handling it would be better to first load the manifest
+    on initialization
+- Consider the interface to be `Pipeline.New()`, `Pipeline.EnableHotReload()`
+    etc. for being stable
