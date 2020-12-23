@@ -14,7 +14,7 @@ var _ = Describe("Acceptance", func() {
 			rendered, err := execute("test_fixtures/working/dist/manifest.json", "test_fixtures/working/index.html")
 
 			Expect(err).To(BeNil())
-			Expect(rendered).To(Equal("<script src=\"/dist/bundle-6f9cdfdf5d45a70ad818b45090761ede.js\"></script>\n<link href=\"/dist/bundle-68b329da9893e34099c7d8ad5cb9c940.css\" />"))
+			Expect(rendered).To(Equal("<script src=\"/dist/bundle-6f9cdfdf5d45a70ad818b45090761ede.js\"></script><link href=\"/dist/bundle-68b329da9893e34099c7d8ad5cb9c940.css\" />"))
 		})
 	})
 
