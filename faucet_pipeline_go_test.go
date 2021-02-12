@@ -9,17 +9,15 @@ var _ = Describe("FaucetPipeline", func() {
 	Context("HotReload", func() {
 		When("hot reload is enabled and manifest.json changes", func() {
 			It("serves new content", func() {
-				faucetPipeline := Pipeline{
-					ManifestPath: "test_fixtures/working/dist/manifest.json",
-					HotReload:    true,
-				}
+				faucetPipeline := NewPipelineAdapter("test_fixtures/working/dist/manifest.json")
+				faucetPipeline.EnableHotReload()
 
 				asset, err := faucetPipeline.TemplateFunc("dist/bundle.css")
 
 				Expect(err).To(BeNil())
 				Expect(asset).To(Equal("/dist/bundle-68b329da9893e34099c7d8ad5cb9c940.css"))
 
-				faucetPipeline.ManifestPath = "test_fixtures/working/dist/manifest2.json"
+				faucetPipeline.manifestPath = "test_fixtures/working/dist/manifest2.json"
 
 				asset, err = faucetPipeline.TemplateFunc("dist/bundle.css")
 
@@ -30,17 +28,14 @@ var _ = Describe("FaucetPipeline", func() {
 
 		When("hot reload is disabled and manifest.json changes", func() {
 			It("serves the same content as before", func() {
-				faucetPipeline := Pipeline{
-					ManifestPath: "test_fixtures/working/dist/manifest.json",
-					HotReload:    false,
-				}
+				faucetPipeline := NewPipelineAdapter("test_fixtures/working/dist/manifest.json")
 
 				asset, err := faucetPipeline.TemplateFunc("dist/bundle.css")
 
 				Expect(err).To(BeNil())
 				Expect(asset).To(Equal("/dist/bundle-68b329da9893e34099c7d8ad5cb9c940.css"))
 
-				faucetPipeline.ManifestPath = "test_fixtures/working/dist/manifest2.json"
+				faucetPipeline.manifestPath = "test_fixtures/working/dist/manifest2.json"
 
 				asset, err = faucetPipeline.TemplateFunc("dist/bundle.css")
 
@@ -53,9 +48,7 @@ var _ = Describe("FaucetPipeline", func() {
 	Context("Execution of generated TemplateFunc by GetTemplateFunc()", func() {
 		When("requested asset is available", func() {
 			It("returns correct path", func() {
-				faucetPipeline := Pipeline{
-					ManifestPath: "test_fixtures/working/dist/manifest.json",
-				}
+				faucetPipeline := NewPipelineAdapter("test_fixtures/working/dist/manifest.json")
 
 				asset, err := faucetPipeline.TemplateFunc("dist/bundle.css")
 
@@ -66,9 +59,7 @@ var _ = Describe("FaucetPipeline", func() {
 
 		When("requested asset is not available", func() {
 			It("returns an error", func() {
-				faucetPipeline := Pipeline{
-					ManifestPath: "test_fixtures/working/dist/manifest.json",
-				}
+				faucetPipeline := NewPipelineAdapter("test_fixtures/working/dist/manifest.json")
 
 				_, err := faucetPipeline.TemplateFunc("dist/nobundle.css")
 
@@ -80,9 +71,7 @@ var _ = Describe("FaucetPipeline", func() {
 	Context("loadManifest()", func() {
 		When("manifest.json is available at the given path", func() {
 			It("returns map with correct contents", func() {
-				faucetPipeline := Pipeline{
-					ManifestPath: "test_fixtures/working/dist/manifest.json",
-				}
+				faucetPipeline := NewPipelineAdapter("test_fixtures/working/dist/manifest.json")
 				manifest, err := faucetPipeline.loadManifest()
 
 				Expect(err).To(BeNil())
@@ -93,9 +82,7 @@ var _ = Describe("FaucetPipeline", func() {
 
 		When("manifest.json is not available at the given path", func() {
 			It("returns an error", func() {
-				faucetPipeline := Pipeline{
-					ManifestPath: "test_fixtures/not_available/dist/manifest.json",
-				}
+				faucetPipeline := NewPipelineAdapter("test_fixtures/not_available/dist/manifest.json")
 				manifest, err := faucetPipeline.loadManifest()
 
 				Expect(err).NotTo(BeNil())

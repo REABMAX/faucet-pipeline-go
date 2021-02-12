@@ -27,9 +27,7 @@ var _ = Describe("Acceptance", func() {
 })
 
 func execute(manifest string, html string) (string, error) {
-	faucetPipeline := faucet.Pipeline{
-		ManifestPath: manifest,
-	}
+	faucetPipeline := faucet.NewPipelineAdapter(manifest)
 
 	tpl, err := template.
 		New("index.html").

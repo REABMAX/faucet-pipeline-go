@@ -19,23 +19,37 @@ To install `faucet-pipeline-go` run
 
 == Usage
 
-Import faucet-pipeline-go:
+Import faucet-pipeline-go. Then, in your main func create a new PipelineAdapter with the the path to your manifest.json
+as parameter:
 
 [source,go]
 ----
+package example
+
 import "github.com/REABMAX/faucet-pipeline-go"
+
+func main() {
+	faucetPipeline := faucet.NewPipelineAdapter("path/to/manifest.json")
+
+	// you can enable/disable/check for hot reloading:
+	faucetPipeline.EnableHotReload()
+	if faucetPipeline.HotReloadIsEnabled() {
+	    faucetPipeline.DisableHotReload()
+	}
+}
 ----
 
-then, in your main func create a FaucetPipeline structure with the ManifestPath as
-configuration parameter:
+The faucet pipeline adapter implements the following interface:
 
 [source,go]
 ----
-func main() {
-	faucetPipeline := faucet.Pipeline{
-		ManifestPath: "path/to/manifest.json",
-		HotReload: true,
-	}
+package faucet
+
+type IPipelineAdapter interface {
+	TemplateFunc() (string, error) // TemplateFunc is a custom function that can be added to go templates as part of a template.FuncMap
+	EnableHotReload() // EnableHotReload enables hot reloading functionality for TemplateFunc
+	DisableHotReload() // DisableHotReload disables hot reloading functionality for TemplateFunc
+	HotReloadIsEnabled() bool // HotReloadIsEnabled checks if hot reload functionality is enabled and returns the fitting boolean value
 }
 ----
 
@@ -77,31 +91,8 @@ We can use our template func with the `assets` shortcut in our template:
 `faucet-pipeline-go` will look for the keys `dist/bundle.js` and `dist/bundle.css` in faucets
 manifest.json and add the fingerprinted file path to the template.
 
-== Configuration
-
-`faucet-pipeline-go` is configurable via exported FaucetPipeline struct properties:
-
-[source,go]
-----
-// Pipeline defines a configuration for faucet-pipeline-go.
-type Pipeline struct {
-	ManifestPath string // ManifestPath: Path to your manifest.json file
-	HotReload bool // HotReload: if true, manifest will be parsed on every call. Good for development purposes
-}
-----
-
 == Tests
 
 For testing https://github.com/onsi/ginkgo[ginkgo] is used. To run the tests:
 
     ginkgo -r
-
-== ToDo / planned
-
-- Optimize HotReload functionality
-    * Reload based on request not on each call
-    * Check for file change date before reload
-- For better error handling it would be better to first load the manifest
-    on initialization
-- Consider the interface to be `Pipeline.New()`, `Pipeline.EnableHotReload()`
-    etc. for being stable

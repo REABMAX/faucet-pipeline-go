@@ -7,24 +7,35 @@ import (
 	"os"
 )
 
-// PipelineInterface defines an interface for faucet-pipeline integrations
-type PipelineInterface interface {
-	TemplateFunc() (string, error)
+// IPipelineAdapter defines an interface for faucet-pipeline integrations
+type IPipelineAdapter interface {
+	TemplateFunc() (string, error) // TemplateFunc is a custom function that can be added to go templates as part of a template.FuncMap
+	EnableHotReload()              // EnableHotReload enables hot reloading functionality for TemplateFunc
+	DisableHotReload()             // DisableHotReload disables hot reloading functionality for TemplateFunc
+	HotReloadIsEnabled() bool      // HotReloadIsEnabled checks if hot reload functionality is enabled and returns the fitting boolean value
 }
 
 // Pipeline defines a configuration for faucet-pipeline-go.
-type Pipeline struct {
-	ManifestPath string   // ManifestPath: Path to your manifest.json file
-	HotReload    bool     // HotReload: if true, manifest will be parsed on every call. Good for development purposes
-	manifest     Manifest // caches parsed manifest data internally
+type PipelineAdapter struct {
+	manifestPath string   // manifestPath: Path to your manifest.json file
+	hotReload    bool     // hotReload: if true, manifest will be parsed on every call. Good for development purposes
+	manifest     manifest // caches parsed manifest data internally
 }
 
-// Manifest defines the go type for manifest data
-type Manifest map[string]string
+// manifest defines the go type for manifest data
+type manifest map[string]string
 
-// TemplateFunc is a custom function that can be added to go templates as part of a template.FuncMap
-func (pipeline *Pipeline) TemplateFunc(assetPath string) (string, error) {
-	manifest, err := pipeline.loadManifest()
+// NewPipelineAdapter creates a new PipelineAdapter instance with hotReload functionality disabled by default. Accepts the
+// manifestPath as only parameter
+func NewPipelineAdapter(manifestPath string) *PipelineAdapter {
+	return &PipelineAdapter{
+		manifestPath: manifestPath,
+		hotReload:    false,
+	}
+}
+
+func (p *PipelineAdapter) TemplateFunc(assetPath string) (string, error) {
+	manifest, err := p.loadManifest()
 	if err != nil {
 		return assetPath, err
 	}
@@ -37,12 +48,24 @@ func (pipeline *Pipeline) TemplateFunc(assetPath string) (string, error) {
 	return fingerprintedAssetPath, nil
 }
 
-// loadManifests parses the manifest file and returns Manifest and error
-func (pipeline *Pipeline) loadManifest() (Manifest, error) {
-	if !pipeline.shouldUseManifestCache() {
-		pipeline.manifest = make(Manifest)
+func (p *PipelineAdapter) EnableHotReload() {
+	p.hotReload = true
+}
 
-		file, err := os.Open(pipeline.ManifestPath)
+func (p *PipelineAdapter) DisableHotReload() {
+	p.hotReload = false
+}
+
+func (p *PipelineAdapter) HotReloadIsEnabled() bool {
+	return p.hotReload
+}
+
+// loadManifests parses the manifest file and returns Manifest and error
+func (p *PipelineAdapter) loadManifest() (manifest, error) {
+	if !p.shouldUseManifestCache() {
+		p.manifest = make(manifest)
+
+		file, err := os.Open(p.manifestPath)
 		if err != nil {
 			return nil, err
 		}
@@ -54,22 +77,22 @@ func (pipeline *Pipeline) loadManifest() (Manifest, error) {
 			return nil, err
 		}
 
-		err = json.Unmarshal(byteValue, &pipeline.manifest)
+		err = json.Unmarshal(byteValue, &p.manifest)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return pipeline.manifest, nil
+	return p.manifest, nil
 }
 
 // shouldUseManifestCache determines whether the internal manifest cache should be used or not
-func (pipeline *Pipeline) shouldUseManifestCache() bool {
-	if pipeline.manifest == nil {
+func (p *PipelineAdapter) shouldUseManifestCache() bool {
+	if p.manifest == nil {
 		return false
 	}
 
-	if pipeline.HotReload {
+	if p.hotReload {
 		return false
 	}
 
